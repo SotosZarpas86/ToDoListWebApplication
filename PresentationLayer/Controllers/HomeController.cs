@@ -19,17 +19,24 @@ namespace PresentationLayer.Controllers
 
         public ActionResult Index()
         {
-            var user = Session["user"] as UserModel;
-            if (user == null)
-                return RedirectToAction("Index", "Login");
-
-            var tasksList = Session["taskList"] as List<TasksModel>;
-            if (tasksList == null)
+            try
             {
-                Session["taskList"] = _taskService.GetAll(1);
-                tasksList = Session["taskList"] as List<TasksModel>;
+                var user = Session["user"] as UserModel;
+                if (user == null)
+                    return RedirectToAction("Index", "Login");
+
+                var tasksList = Session["taskList"] as List<TasksModel>;
+                if (tasksList == null)
+                {
+                    Session["taskList"] = _taskService.GetAll(user.UserID);
+                    tasksList = Session["taskList"] as List<TasksModel>;
+                }
+                return View(tasksList);
             }
-            return View(tasksList);
+            catch(Exception ex)
+            {
+                return View("Error");
+            }
         }
 
         [HttpGet]
@@ -47,6 +54,9 @@ namespace PresentationLayer.Controllers
         {
             var user = Session["user"] as UserModel;
             if (user == null)
+                return RedirectToAction("Index", "Login");
+
+            if (string.IsNullOrWhiteSpace(task.Title) || string.IsNullOrWhiteSpace(task.Description))
                 return RedirectToAction("Index", "Login");
 
             task.TaskID = Guid.NewGuid();
@@ -72,7 +82,10 @@ namespace PresentationLayer.Controllers
         {
             var result = false;
             var tasksList = Session["taskList"] as List<TasksModel>;
-            if (tasksList.Remove(tasksList.SingleOrDefault(t => t.TaskID == id)))
+
+            var responseFromService = _taskService.Delete(id);
+            var responseFromSession = tasksList.Remove(tasksList.SingleOrDefault(t => t.TaskID == id));
+            if (responseFromService && responseFromSession)
                 result = true;
 
             return Json(result);
@@ -81,17 +94,26 @@ namespace PresentationLayer.Controllers
         [HttpPost]
         public ActionResult SaveAll()
         {
-            var user = Session["user"] as UserModel;
-            if (user == null)
-                return RedirectToAction("Index", "Login");
-
-            var taskList = Session["taskList"] as List<TasksModel>;
-            foreach(var item in taskList)
+            try
             {
-                item.UserId = user.UserID;
+                var user = Session["user"] as UserModel;
+                if (user == null)
+                    return RedirectToAction("Index", "Login");
+
+                var taskList = Session["taskList"] as List<TasksModel>;
+                foreach (var item in taskList)
+                {
+                    item.UserId = user.UserID;
+                }
+                var result = _taskService.SaveAll(taskList);
+                Session["taskList"] = result;
+
+                return RedirectToAction("Index", "Home");
             }
-            var result = _taskService.SaveAll(taskList);
-            return RedirectToAction("Index", "Home");
+            catch(Exception ex)
+            {
+                return View("Error");
+            }
         }
     }
 }

@@ -31,9 +31,16 @@ namespace PresentationLayer.Controllers
                 return View("Index");
             }
             var result = _loginService.Login(user);
-            Session["user"] = result;
-            Session["taskList"] = result.Tasks;
-            return RedirectToAction("Index", "Home");
+            if(result.UserID != 0)
+            {
+                Session["user"] = result;
+                Session["taskList"] = result.Tasks;
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                return View("Index");
+            }
         }
 
         public ActionResult Logout()

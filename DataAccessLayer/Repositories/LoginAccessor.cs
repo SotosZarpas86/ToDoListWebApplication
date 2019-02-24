@@ -14,7 +14,7 @@ namespace DataLayer.Repositories
                 using (var ctx = new ToDoListContext())
                 {
                     var result = ctx.Users.SingleOrDefault(u => u.Username.Equals(user.Username) && u.Password.Equals(user.Password));
-                    if (result.UserID != 0)
+                    if (result != null)
                     {
                         user.UserID = result.UserID;
                         user.Tasks = ctx.Tasks.Where(t => t.UserId == result.UserID).ToList();

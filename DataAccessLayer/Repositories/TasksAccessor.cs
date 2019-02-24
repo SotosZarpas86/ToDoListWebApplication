@@ -26,19 +26,43 @@ namespace DataLayer.Repositories
             }
             return result;
         }
-        public bool SaveAll(List<Tasks> tasks)
+        public List<Tasks> SaveAll(List<Tasks> tasks)
         {
-            var result = false;
             try
             {
                 using (var ctx = new ToDoListContext())
                 {
                     foreach (var task in tasks)
                     {
-                        ctx.Set<Tasks>().AddOrUpdate(task);
-                        ctx.Set<Tasks>().AddOrUpdate(task);
+                        var result = ctx.Tasks.SingleOrDefault(t => t.ID == task.ID);
+                        if(result == null)
+                            ctx.Tasks.Add(task);
+                        else
+                            ctx.Entry(result).CurrentValues.SetValues(task);
                     }
                     ctx.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return tasks;
+        }
+
+        public bool Delete(Guid taskId)
+        {
+            var result = false;
+            try
+            {
+                using (var ctx = new ToDoListContext())
+                {
+                    var task = ctx.Tasks.SingleOrDefault(t => t.TaskID == taskId);
+                    if(task != null)
+                        ctx.Tasks.Remove(task);
+
+                    ctx.SaveChanges();
+                    result = true;
                 }
             }
             catch (Exception ex)

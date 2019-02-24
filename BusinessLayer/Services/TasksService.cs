@@ -18,17 +18,46 @@ namespace BusinessLayer.Services
 
         public List<TasksModel> GetAll(int userId)
         {
-            var taskDb = _taskAccessor.GetAll(userId);
-            var mapper = MappingProfile.InitializeAutoMapper().CreateMapper();
-            var taskBs = mapper.Map<List<Tasks>, List<TasksModel>>(taskDb);
-            return taskBs;
+            var tasksBs = new List<TasksModel>();
+            try
+            {
+                var tasksDb = _taskAccessor.GetAll(userId);
+                var mapper = MappingProfile.InitializeAutoMapper().CreateMapper();
+                tasksBs = mapper.Map<List<Tasks>, List<TasksModel>>(tasksDb);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return tasksBs;
         }
-        public bool SaveAll(List<TasksModel> tasks)
+        public List<TasksModel> SaveAll(List<TasksModel> tasks)
+        {
+            try
+            {
+                var mapper = MappingProfile.InitializeAutoMapper().CreateMapper();
+                var taskDb = mapper.Map<List<TasksModel>, List<Tasks>>(tasks);
+                var result = _taskAccessor.SaveAll(taskDb);
+                tasks = mapper.Map<List<Tasks>, List<TasksModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return tasks;
+        }
+
+        public bool Delete(Guid taskId)
         {
             var result = false;
-            var mapper = MappingProfile.InitializeAutoMapper().CreateMapper();
-            var taskDb = mapper.Map<List<TasksModel>, List<Tasks>>(tasks);
-            result = _taskAccessor.SaveAll(taskDb);
+            try
+            {
+                result = _taskAccessor.Delete(taskId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
             return result;
         }
     }

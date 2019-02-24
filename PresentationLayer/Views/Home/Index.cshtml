@@ -4,19 +4,19 @@
     ViewBag.Title = "To Do List";
 }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/jquery.dataTables.css" />
 
-
-<button id='addNewTask' class="btn btn-primary">Add New Task</button>
-<button id='saveAll' class="btn btn-primary" onclick="SaveAll()">Save Changes</button>
+<div style="margin-bottom:10px;">
+    <button id='addNewTask' class="btn btn-primary">Add New Task</button>
+    <button id='saveAll' class="btn btn-primary" onclick="SaveAll()">Save Changes</button>
+</div>
 <table id="example" class="table">
     <thead>
         <tr>
             <th>Title</th>
             <th>Description</th>
-            <th>DateAdded</th>
-            <th>DateUpdated</th>
-            <th>Checked</th>
+            <th>Date Added</th>
+            <th>Date Updated</th>
+            <th>Done</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -41,7 +41,7 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/js/jquery.dataTables.min.js"></script>
+
 <script>
 
     var table = [];
