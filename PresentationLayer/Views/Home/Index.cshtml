@@ -1,0 +1,97 @@
+﻿@model IEnumerable<BusinessLayer.Models.TasksModel>
+
+@{
+    ViewBag.Title = "To Do List";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/jquery.dataTables.css" />
+
+
+<button id='addNewTask' class="btn btn-primary">Add New Task</button>
+<button id='saveAll' class="btn btn-primary" onclick="SaveAll()">Save Changes</button>
+<table id="example" class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>DateAdded</th>
+            <th>DateUpdated</th>
+            <th>Checked</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr id="@item.TaskID">
+                <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                <td>@Html.DisplayFor(modelItem => item.DateAdded)</td>
+                <td>@Html.DisplayFor(modelItem => item.DateUpdated)</td>
+                <td>@Html.CheckBoxFor(modelItem => item.Status, new { id="statusBox", @onclick = "UpdateRow('" + item.TaskID + "')" })</td>
+                <td><button id="deleteRow" type="button" class="btn btn-warning" onclick="DeleteRow('@item.TaskID')">Remove</button></td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+<div id='taskModal' class='modal fade in' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-url='@Url.Action("GetTaskPartial")'>
+    <div id='taskContainer' class="modal-dialog" role="document">
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/js/jquery.dataTables.min.js"></script>
+<script>
+
+    var table = [];
+    $(document).ready(function () {
+        table = $('#example').DataTable({
+
+        });
+    });
+
+    $('#addNewTask').click(function () {
+        var url = $('#taskModal').data('url');
+        $.get(url, function (data) {
+            $('#taskContainer').html(data);
+            $('#taskModal').modal('show');
+        });
+    });
+
+    function UpdateRow(id) {
+        var status = $("#statusBox").prop('checked');
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("UpdateRow", "Home")',
+            data: { id: id, status: status },
+            success: function (data) {
+
+            }
+        });
+    }
+
+    function DeleteRow(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("RemoveRow", "Home")',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    table.row("#" + id).remove().draw(false);
+                }
+            }
+        });
+    }
+
+    function SaveAll() {
+         $.ajax({
+            type: "POST",
+            url: '@Url.Action("SaveAll", "Home")',
+            success: function (data) {
+                
+            }
+        });
+    }
+
+</script>
